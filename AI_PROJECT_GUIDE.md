@@ -16,7 +16,9 @@
 - **Estado**:
   - Redux Toolkit (`configureStore`) em `src/renderer/store.ts`.
   - RTK Query (`createApi`) para chamadas HTTP ao backend de timesheets.
-  - Persistência leve de preferências em **SQLite** (via `better-sqlite3`) no processo main.
+  - Persistência leve de preferências em **SQLite** (via `better-sqlite3`) no processo main, com o arquivo `settings.db` gravado:
+    - Em dev: em `app.getPath("userData")`.
+    - Em build (app empacotado): na **mesma pasta do `.exe`**.
 
 ## Estrutura relevante de pastas (renderer)
 
@@ -62,8 +64,11 @@
 
 - **BaseQuery dinâmica**:
   - `dynamicBaseQuery` lê `state.environment.current` (slice `environment`) e:
-    - Resolve `baseUrl` a partir de `hostsByEnv`.
-    - Garante que `args.url` seja prefixada com o host correto quando relativa.
+    - Resolve `baseUrl` a partir de `hostsByEnv` ou do `customHost` quando o ambiente é `local`.
+    - Normaliza o host (`/` finais) e faz o join seguro com o path da requisição.
+  - A chave da query inclui campos técnicos (`_ts`, `_env`) para forçar **refetch automático** quando:
+    - O usuário clica em **Buscar** (`_ts` muda).
+    - O ambiente/host muda (`_env` muda), garantindo nova chamada de API ao mudar de ambiente.
 
 - **Endpoint principal**:
   - `getQueueJobs`: `GET /api/v1/Sync/queue-jobs`
@@ -97,7 +102,7 @@
 - Componente: `src/renderer/features/timesheet/EnvironmentSelector.tsx`
   - Combobox “Ambiente” na AppBar.
   - Opções: **Develop / Qualidade / Produção / Local**.
-  - Ao alterar, dispara `setEnvironment`, impactando o host usado por RTK Query.
+  - Ao alterar, dispara `setEnvironment`, impactando o host usado por RTK Query **e disparando automaticamente nova consulta via RTK Query (por causa do campo `_env` na chave da query)**.
   - Quando `Local` está selecionado:
     - Exibe um `TextField` logo abaixo para digitar o host (ex.: `http://localhost:5000`).
     - O valor do campo é salvo em `customHost` via `setLocalHost`.
@@ -108,7 +113,9 @@
 ## Persistência (SQLite + preload + IPC)
 
 - Arquivo: `src/main/storage.ts`
-  - Usa `better-sqlite3` para gravar um pequeno banco `settings.db` em `app.getPath("userData")`.
+  - Usa `better-sqlite3` para gravar um pequeno banco `settings.db`.
+    - Em dev: caminho base = `app.getPath("userData")`.
+    - Em build (`app.isPackaged === true`): caminho base = `path.dirname(app.getPath("exe"))`, ou seja, **ao lado do `.exe`**.
   - Tabela `app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`.
   - Funções:
     - `getEnvironmentSettings(): { current: string; customHost: string } | null`.
