@@ -91,14 +91,7 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
             fontSize: 11
           }}
         >
-          {JSON.stringify(
-            {
-              payload: job.payload,
-              errorMessage: job.errorMessage
-            },
-            null,
-            2
-          )}
+          {JSON.stringify(job.payload, null, 2)}
         </Box>
       </Box>
     </Drawer>
