@@ -2,7 +2,7 @@
   "name": "timesheetimporttrace",
   "version": "1.0.0",
   "description": "TimesheetImportTrace - Electron + React + TypeScript + Redux + Material UI",
-  "main": "dist/main/main.js",
+  "main": "dist/main/main/main.js",
   "scripts": {
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:main\"",
     "dev:renderer": "vite",
