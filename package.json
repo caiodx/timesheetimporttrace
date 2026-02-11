@@ -10,7 +10,8 @@
     "build": "vite build && tsc -p tsconfig.main.json",
     "build:win": "npm run build && electron-builder --win --x64",
     "build:win:portable": "npm run build && electron-builder --win portable",
-    "lint": "eslint \"src/**/*.{ts,tsx}\""
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "rebuild": "electron-rebuild"
   },
   "keywords": [
     "electron",
@@ -35,6 +36,7 @@
     "cross-env": "^10.1.0",
     "electron": "^40.3.0",
     "electron-builder": "^26.7.0",
+    "electron-rebuild": "^3.2.9",
     "eslint": "^10.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
