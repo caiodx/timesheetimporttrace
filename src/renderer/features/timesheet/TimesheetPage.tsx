@@ -5,6 +5,7 @@ import { TimesheetFilters, TimesheetFiltersValues } from "./TimesheetFilters";
 import { TimesheetJobsGrid } from "./TimesheetJobsGrid";
 import { JobDetailsDrawer } from "./JobDetailsDrawer";
 import type { TimesheetSyncJobInfo, TimesheetSyncJobStatus } from "../../services/timesheetApi";
+import { useAppSelector } from "../../hooks";
 
 const SlideUp = (props: any) => <Slide {...props} direction="up" />;
 
@@ -14,6 +15,9 @@ export const TimesheetPage: React.FC = () => {
   const endOfMonth = new Date(todayDate.getFullYear(), todayDate.getMonth() + 1, 0)
     .toISOString()
     .slice(0, 10);
+
+  const currentEnvironment = useAppSelector(state => state.environment.current);
+  const customHost = useAppSelector(state => state.environment.customHost);
 
   const [filters, setFilters] = useState<TimesheetFiltersValues>({
     status: undefined,
@@ -42,9 +46,10 @@ export const TimesheetPage: React.FC = () => {
         : undefined,
       page,
       pageSize,
-      _ts: searchTrigger
+      _ts: searchTrigger,
+      _env: `${currentEnvironment}:${customHost}` // Inclui ambiente para forçar refetch quando mudar
     }),
-    [filters, page, pageSize, searchTrigger]
+    [filters, page, pageSize, searchTrigger, currentEnvironment, customHost]
   );
 
   const { data, isLoading, isFetching, isError, error } = useGetQueueJobsQuery(queryParams, {

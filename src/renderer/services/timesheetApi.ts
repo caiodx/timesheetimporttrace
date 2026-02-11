@@ -101,6 +101,8 @@ export interface QueueJobsQuery {
   email?: string;
   timeSheetDateIni?: string;
   timeSheetDateEnd?: string;
+  _ts?: number; // Timestamp para forçar refetch
+  _env?: string; // Ambiente para forçar refetch quando mudar
 }
 
 const hostsByEnv: Record<Exclude<EnvironmentKey, "local">, string> = {
