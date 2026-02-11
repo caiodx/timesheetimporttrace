@@ -75,10 +75,9 @@ export const TimesheetJobsGrid: React.FC<Props> = ({
       headerName: "Motorista",
       flex: 1.4,
       minWidth: 180,
-      valueGetter: params => params.row.payload?.driver?.driverName ?? "",
       renderCell: params => {
-        const name = params.row.payload?.driver?.driverName ?? "—";
-        const email = params.row.payload?.driver?.email ?? "";
+        const name = params.row?.payload?.driver?.driverName ?? "—";
+        const email = params.row?.payload?.driver?.email ?? "";
         return (
           <Box>
             <Typography variant="body2" noWrap>

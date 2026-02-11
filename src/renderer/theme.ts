@@ -15,12 +15,19 @@ export const theme = createTheme({
     }
   },
   typography: {
+    htmlFontSize: 14,
     fontFamily: `"Inter", "Roboto", "Helvetica", "Arial", sans-serif`,
     h4: {
       fontWeight: 600
     },
     body1: {
-      fontSize: 14
+      fontSize: 13
+    },
+    body2: {
+      fontSize: 12
+    },
+    caption: {
+      fontSize: 11
     }
   },
   shape: {
