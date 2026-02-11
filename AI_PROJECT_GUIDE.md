@@ -12,9 +12,11 @@
   - Vite (`root` em `src/renderer`) para dev/build do renderer.
   - Material UI (`@mui/material`, `@emotion/*`) para UI.
   - `@mui/x-data-grid` para grid paginada de jobs.
+  - `dayjs` para formatação de datas na grid.
 - **Estado**:
   - Redux Toolkit (`configureStore`) em `src/renderer/store.ts`.
   - RTK Query (`createApi`) para chamadas HTTP ao backend de timesheets.
+  - Persistência leve de preferências em **SQLite** (via `better-sqlite3`) no processo main.
 
 ## Estrutura relevante de pastas (renderer)
 
@@ -65,30 +67,63 @@
 
 - **Endpoint principal**:
   - `getQueueJobs`: `GET /api/v1/Sync/queue-jobs`
-  - Parâmetros aceitos pelo hook:
+  - Parâmetros aceitos pelo hook (`QueueJobsQuery`):
     - `status?: TimesheetSyncJobStatus` (ex.: `Enqueued`, `Processing`, `Completed`, `Failed`).
     - `page: number` (1-based).
     - `pageSize: number`.
     - `driverName?: string`.
     - `email?: string`.
-    - `timeSheetDate?: string` (enviado como `YYYY-MM-DDT00:00:00Z`).
+    - `timeSheetDateIni?: string` – data/hora inicial no formato `YYYY-MM-DDTHH:mm:ss` (frontend envia `T00:00:00`).
+    - `timeSheetDateEnd?: string` – data/hora final no formato `YYYY-MM-DDTHH:mm:ss` (frontend envia `T23:59:59`).
   - Tipos TypeScript principais:
     - `TimesheetSyncJobPage` → `{ totalCount, page, pageSize, items }`.
     - `TimesheetSyncJobInfo` → campos do job + `payload: SyncData`.
     - `SyncData`, `DriverSyncData`, `TimesheetSyncData`, `ServicesSyncData`, `SyncActionEnum`.
 
+- **Notas sobre serialização de propriedades**:
+  - O backend C# expõe modelos em PascalCase (`JobId`, `TimeSheetDate`, `CreatedAtUtc`, etc.).
+  - O tipo `TimesheetSyncJobInfo` no frontend aceita **camelCase e PascalCase** simultaneamente (campos duplicados) para ser resiliente à forma como a API serializa.
+
 ## Controle de ambiente
 
 - Slice: `src/renderer/features/timesheet/environmentSlice.ts`
   - Estado:
-    - `current: "develop" | "qa" | "prod"`.
+    - `current: "develop" | "qa" | "prod" | "local"`.
+    - `customHost: string` para armazenar o host digitado quando o ambiente é `local`.
   - Ações:
     - `setEnvironment(env: EnvironmentKey)`.
+    - `setLocalHost(host: string)`.
 
 - Componente: `src/renderer/features/timesheet/EnvironmentSelector.tsx`
   - Combobox “Ambiente” na AppBar.
-  - Opções: Develop / Qualidade / Produção.
+  - Opções: **Develop / Qualidade / Produção / Local**.
   - Ao alterar, dispara `setEnvironment`, impactando o host usado por RTK Query.
+  - Quando `Local` está selecionado:
+    - Exibe um `TextField` logo abaixo para digitar o host (ex.: `http://localhost:5000`).
+    - O valor do campo é salvo em `customHost` via `setLocalHost`.
+  - Integração com Electron:
+    - Usa `window.electronAPI.getEnvironment()` e `.setEnvironment()` (expostos pelo preload) para persistir `current` e `customHost` em SQLite.
+    - Na montagem, lê valores salvos e hidrata o slice; depois disso, qualquer mudança é gravada automaticamente.
+
+## Persistência (SQLite + preload + IPC)
+
+- Arquivo: `src/main/storage.ts`
+  - Usa `better-sqlite3` para gravar um pequeno banco `settings.db` em `app.getPath("userData")`.
+  - Tabela `app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`.
+  - Funções:
+    - `getEnvironmentSettings(): { current: string; customHost: string } | null`.
+    - `saveEnvironmentSettings(settings)`.
+- `src/main/main.ts`:
+  - Registra IPC:
+    - `settings:getEnvironment` → devolve `getEnvironmentSettings()`.
+    - `settings:setEnvironment` → chama `saveEnvironmentSettings`.
+  - Aponta `preload` para `dist/main/preload/preload.js`.
+- `src/preload/preload.ts`:
+  - Usa `contextBridge` para expor em `window`:
+    - `electronAPI.getEnvironment()`.
+    - `electronAPI.setEnvironment(settings)`.
+- `src/types/electron-api.d.ts`:
+  - Declara os tipos de `window.electronAPI` para o TypeScript do renderer.
 
 ## Layout principal da tela
 
@@ -109,13 +144,19 @@
     - Drawer de detalhes (`JobDetailsDrawer`).
     - Snackbar de erro.
   - Estado local:
-    - `filters` (status, driverName, email, timeSheetDate).
+    - `filters` (status, driverName, email, timeSheetDateIni, timeSheetDateEnd).
     - `page`, `pageSize`.
     - `searchTrigger` (força refetch).
     - `selectedJob` (para detalhes).
     - `showError` (snackbar).
   - Interação com API:
     - Monta `queryParams` memorizados e chama `useGetQueueJobsQuery`.
+    - Converte datas do filtro para:
+      - `timeSheetDateIni = {dataIni}T00:00:00`.
+      - `timeSheetDateEnd = {dataEnd}T23:59:59`.
+    - Por padrão:
+      - `timeSheetDateIni` = dia atual.
+      - `timeSheetDateEnd` = último dia do mês corrente.
     - `handleSearch()`:
       - Reseta página para 1.
       - Incrementa `searchTrigger`.
@@ -127,7 +168,7 @@
 - Arquivo: `src/renderer/features/timesheet/TimesheetFilters.tsx`
 
 - Recebe via props:
-  - `values`: objeto com `status`, `driverName`, `email`, `timeSheetDate`.
+  - `values`: objeto com `status`, `driverName`, `email`, `timeSheetDateIni`, `timeSheetDateEnd`.
   - `onChange(values)`.
   - `onSearch()`.
   - `onClear()`.
@@ -137,13 +178,16 @@
   - `Paper` com:
     - Cabeçalho (título, descrição curta, spinner opcional).
     - Grid de campos:
-      - `Select` de `status` + opção “Padrão (Enqueued)”.
+      - `Select` de `status` com opção **“Sem filtro de status”** (valor vazio).
       - `TextField` para nome.
       - `TextField` para e-mail.
-      - `TextField` `type="date"` para data de timesheet.
-    - Rodapé com botões:
-      - **Limpar filtros**: desabilitado se não há filtros ativos.
-      - **Buscar**: desabilitado quando `loading`.
+      - `TextField` `type="date"` para **Data inicial**.
+      - `TextField` `type="date"` para **Data final**.
+    - Regras:
+      - Botão **Limpar filtros** limpa apenas status/nome/email e restaura datas para:
+        - `timeSheetDateIni` = hoje.
+        - `timeSheetDateEnd` = último dia do mês corrent e.
+      - Botão **Buscar** desabilitado quando `loading`.
 
 ## Grid paginada de resultados
 
@@ -166,8 +210,8 @@
     - `status` usando `Chip` com cores contextuais.
     - `driver` (nome + email, vindos de `payload.driver`).
     - `driverInternalNumber`.
-    - `timeSheetDate` (data).
-    - `createdAtUtc`, `lastUpdatedAtUtc` (data/hora formatadas).
+    - `timeSheetDate` (data), usando `dayjs` + `format("DD/MM/YYYY")` e lendo tanto `timeSheetDate` quanto `TimeSheetDate`.
+    - `createdAtUtc`, `lastUpdatedAtUtc` (data/hora formatadas com `dayjs` em `DD/MM/YYYY HH:mm`, lendo camelCase e PascalCase).
     - `errorMessage` (texto vermelho truncado, tooltip com completo).
   - Estados visuais:
     - Enquanto `loading` sem dados → skeleton de texto + bloco retangular.

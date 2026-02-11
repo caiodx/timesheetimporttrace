@@ -9,11 +9,18 @@ import type { TimesheetSyncJobInfo, TimesheetSyncJobStatus } from "../../service
 const SlideUp = (props: any) => <Slide {...props} direction="up" />;
 
 export const TimesheetPage: React.FC = () => {
+  const todayDate = new Date();
+  const today = todayDate.toISOString().slice(0, 10); // yyyy-MM-dd
+  const endOfMonth = new Date(todayDate.getFullYear(), todayDate.getMonth() + 1, 0)
+    .toISOString()
+    .slice(0, 10);
+
   const [filters, setFilters] = useState<TimesheetFiltersValues>({
     status: undefined,
     driverName: "",
     email: "",
-    timeSheetDate: ""
+    timeSheetDateIni: today,
+    timeSheetDateEnd: endOfMonth
   });
 
   const [page, setPage] = useState(1);
@@ -27,7 +34,12 @@ export const TimesheetPage: React.FC = () => {
       status: (filters.status as TimesheetSyncJobStatus | undefined) ?? undefined,
       driverName: filters.driverName || undefined,
       email: filters.email || undefined,
-      timeSheetDate: filters.timeSheetDate ? `${filters.timeSheetDate}T00:00:00Z` : undefined,
+      timeSheetDateIni: filters.timeSheetDateIni
+        ? `${filters.timeSheetDateIni}T00:00:00`
+        : undefined,
+      timeSheetDateEnd: filters.timeSheetDateEnd
+        ? `${filters.timeSheetDateEnd}T23:59:59`
+        : undefined,
       page,
       pageSize,
       _ts: searchTrigger
@@ -49,7 +61,8 @@ export const TimesheetPage: React.FC = () => {
       status: undefined,
       driverName: "",
       email: "",
-      timeSheetDate: ""
+      timeSheetDateIni: today,
+      timeSheetDateEnd: endOfMonth
     });
     setPage(1);
     setSearchTrigger(x => x + 1);

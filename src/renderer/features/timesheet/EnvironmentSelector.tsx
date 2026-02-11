@@ -24,6 +24,7 @@ export const EnvironmentSelector: React.FC = () => {
   const dispatch = useAppDispatch();
   const current = useAppSelector(state => state.environment.current);
   const customHost = useAppSelector(state => state.environment.customHost);
+  const [hydrated, setHydrated] = React.useState(false);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     dispatch(setEnvironment(event.target.value as EnvironmentKey));
@@ -34,6 +35,41 @@ export const EnvironmentSelector: React.FC = () => {
   };
 
   const isLocal = current === "local";
+
+  React.useEffect(() => {
+    if (!window.electronAPI?.getEnvironment) {
+      setHydrated(true);
+      return;
+    }
+
+    window.electronAPI
+      .getEnvironment()
+      .then(saved => {
+        if (saved?.current) {
+          dispatch(setEnvironment(saved.current as EnvironmentKey));
+        }
+        if (typeof saved?.customHost === "string") {
+          dispatch(setLocalHost(saved.customHost));
+        }
+      })
+      .catch(() => {
+        // silencioso: se falhar, segue com defaults
+      })
+      .finally(() => {
+        setHydrated(true);
+      });
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (!hydrated) return;
+    if (!window.electronAPI?.setEnvironment) return;
+
+    window.electronAPI
+      .setEnvironment({ current, customHost })
+      .catch(() => {
+        // silencioso: não bloquear UI
+      });
+  }, [current, customHost, hydrated]);
 
   return (
     <Tooltip title="Selecione o ambiente de chamada da API">

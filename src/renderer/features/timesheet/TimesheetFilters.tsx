@@ -18,7 +18,8 @@ export interface TimesheetFiltersValues {
   status?: TimesheetSyncJobStatus;
   driverName: string;
   email: string;
-  timeSheetDate: string;
+  timeSheetDateIni: string;
+  timeSheetDateEnd: string;
 }
 
 interface Props {
@@ -53,8 +54,7 @@ export const TimesheetFilters: React.FC<Props> = ({
     onChange({ ...values, status: event.target.value as TimesheetSyncJobStatus });
   };
 
-  const hasFilters =
-    !!values.status || !!values.driverName || !!values.email || !!values.timeSheetDate;
+  const hasFilters = !!values.status || !!values.driverName || !!values.email;
 
   return (
     <Paper sx={{ p: 2.5 }}>
@@ -73,7 +73,9 @@ export const TimesheetFilters: React.FC<Props> = ({
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6} md={3}>
           <FormControl fullWidth size="small">
-            <InputLabel id="status-label">Status</InputLabel>
+            <InputLabel id="status-label" shrink>
+              Status
+            </InputLabel>
             <Select
               labelId="status-label"
               id="status-select"
@@ -83,7 +85,7 @@ export const TimesheetFilters: React.FC<Props> = ({
               displayEmpty
             >
               <MenuItem value="">
-                <em>Padrão (Enqueued)</em>
+                <em>Sem filtro de status</em>
               </MenuItem>
               {statusOptions.map(option => (
                 <MenuItem key={option.value} value={option.value}>
@@ -118,12 +120,24 @@ export const TimesheetFilters: React.FC<Props> = ({
 
         <Grid item xs={12} sm={6} md={3}>
           <TextField
-            label="Data da timesheet"
+            label="Data inicial"
             type="date"
             fullWidth
             size="small"
-            value={values.timeSheetDate}
-            onChange={handleFieldChange("timeSheetDate")}
+            value={values.timeSheetDateIni}
+            onChange={handleFieldChange("timeSheetDateIni")}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <TextField
+            label="Data final"
+            type="date"
+            fullWidth
+            size="small"
+            value={values.timeSheetDateEnd}
+            onChange={handleFieldChange("timeSheetDateEnd")}
             InputLabelProps={{ shrink: true }}
           />
         </Grid>

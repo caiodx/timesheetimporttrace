@@ -75,6 +75,15 @@ export interface TimesheetSyncJobInfo {
   lastUpdatedAtUtc: string;
   errorMessage?: string | null;
   payload: SyncData;
+  // fallback quando a API retornar em PascalCase (C# default)
+  JobId?: string;
+  Status?: TimesheetSyncJobStatus;
+  DriverInternalNumber?: number | null;
+  TimeSheetDate?: string;
+  CreatedAtUtc?: string;
+  LastUpdatedAtUtc?: string;
+  ErrorMessage?: string | null;
+  Payload?: SyncData;
 }
 
 export interface TimesheetSyncJobPage {
@@ -90,7 +99,8 @@ export interface QueueJobsQuery {
   pageSize: number;
   driverName?: string;
   email?: string;
-  timeSheetDate?: string;
+  timeSheetDateIni?: string;
+  timeSheetDateEnd?: string;
 }
 
 const hostsByEnv: Record<Exclude<EnvironmentKey, "local">, string> = {
@@ -111,17 +121,28 @@ const dynamicBaseQuery: typeof rawBaseQuery = async (args, api, extraOptions) =>
   const state = api.getState() as RootState;
   const envKey = state.environment.current as EnvironmentKey;
 
-  const baseUrl =
+  const rawBaseUrl =
     envKey === "local"
       ? (state.environment.customHost ?? "")
       : hostsByEnv[envKey as Exclude<EnvironmentKey, "local">];
 
+  // Normaliza baseUrl para evitar problemas com "/" duplicado ou faltando
+  const baseUrl = rawBaseUrl.replace(/\/+$/, "");
+
+  const joinUrl = (base: string, path: string) => {
+    const cleanBase = base.replace(/\/+$/, "");
+    const cleanPath = path.replace(/^\/+/, "");
+    return `${cleanBase}/${cleanPath}`;
+  };
+
   const adjustedArgs =
     typeof args === "string"
-      ? { url: baseUrl + args }
+      ? {
+          url: args.startsWith("http") ? args : joinUrl(baseUrl, args)
+        }
       : {
           ...args,
-          url: args.url.startsWith("http") ? args.url : baseUrl + args.url
+          url: args.url.startsWith("http") ? args.url : joinUrl(baseUrl, args.url)
         };
 
   return rawBaseQuery(adjustedArgs, api, extraOptions);
@@ -133,7 +154,8 @@ export const timesheetApi = createApi({
   endpoints: builder => ({
     getQueueJobs: builder.query<TimesheetSyncJobPage, QueueJobsQuery>({
       query: params => {
-        const { page, pageSize, status, driverName, email, timeSheetDate } = params;
+        const { page, pageSize, status, driverName, email, timeSheetDateIni, timeSheetDateEnd } =
+          params;
 
         const queryParams: Record<string, string | number> = {
           page,
@@ -143,7 +165,8 @@ export const timesheetApi = createApi({
         if (status) queryParams.status = status;
         if (driverName) queryParams.driverName = driverName;
         if (email) queryParams.email = email;
-        if (timeSheetDate) queryParams.timeSheetDate = timeSheetDate;
+        if (timeSheetDateIni) queryParams.timeSheetDateIni = timeSheetDateIni;
+        if (timeSheetDateEnd) queryParams.timeSheetDateEnd = timeSheetDateEnd;
 
         return {
           url: "/api/v1/Sync/queue-jobs",

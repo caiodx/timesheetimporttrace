@@ -1,8 +1,22 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
 import * as url from "url";
+import { getEnvironmentSettings, saveEnvironmentSettings } from "./storage";
 
 const isDev = process.env.NODE_ENV === "development";
+
+function registerIpc() {
+  ipcMain.handle("settings:getEnvironment", () => {
+    return getEnvironmentSettings();
+  });
+
+  ipcMain.handle(
+    "settings:setEnvironment",
+    (_event, settings: { current: string; customHost: string }) => {
+      saveEnvironmentSettings(settings);
+    }
+  );
+}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -10,9 +24,11 @@ function createWindow() {
     height: 800,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, "../preload/preload.cjs")
+      preload: path.join(__dirname, "../preload/preload.js")
     }
   });
+
+  mainWindow.maximize();
 
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173");
@@ -28,7 +44,10 @@ function createWindow() {
   }
 }
 
-app.on("ready", createWindow);
+app.on("ready", () => {
+  registerIpc();
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

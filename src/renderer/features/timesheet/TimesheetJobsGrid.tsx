@@ -6,6 +6,7 @@ import {
   GridRenderCellParams,
   GridRowParams
 } from "@mui/x-data-grid";
+import dayjs from "dayjs";
 import type { TimesheetSyncJobInfo, TimesheetSyncJobPage } from "../../services/timesheetApi";
 
 interface Props {
@@ -26,8 +27,19 @@ const statusColor: Record<string, "default" | "success" | "error" | "warning" | 
   Failed: "error"
 };
 
-const formatDate = (value: string) =>
-  new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+const formatDateTime = (value: unknown) => {
+  if (!value) return "—";
+  const d = dayjs(value as any);
+  if (!d.isValid()) return "—";
+  return d.format("DD/MM/YYYY HH:mm");
+};
+
+const formatDateOnly = (value: unknown) => {
+  if (!value) return "—";
+  const d = dayjs(value as any);
+  if (!d.isValid()) return "—";
+  return d.format("DD/MM/YYYY");
+};
 
 export const TimesheetJobsGrid: React.FC<Props> = ({
   data,
@@ -103,22 +115,42 @@ export const TimesheetJobsGrid: React.FC<Props> = ({
       headerName: "Data TS",
       flex: 0.9,
       minWidth: 120,
-      valueFormatter: params =>
-        new Date(params.value as string).toLocaleDateString("pt-BR")
+      renderCell: params => (
+        <Typography variant="body2">
+          {formatDateOnly(
+            (params.row as TimesheetSyncJobInfo).timeSheetDate ??
+              (params.row as TimesheetSyncJobInfo).TimeSheetDate
+          )}
+        </Typography>
+      )
     },
     {
       field: "createdAtUtc",
       headerName: "Criado em",
       flex: 1.1,
       minWidth: 160,
-      valueFormatter: params => formatDate(params.value as string)
+      renderCell: params => (
+        <Typography variant="body2">
+          {formatDateTime(
+            (params.row as TimesheetSyncJobInfo).createdAtUtc ??
+              (params.row as TimesheetSyncJobInfo).CreatedAtUtc
+          )}
+        </Typography>
+      )
     },
     {
       field: "lastUpdatedAtUtc",
       headerName: "Atualizado em",
       flex: 1.1,
       minWidth: 160,
-      valueFormatter: params => formatDate(params.value as string)
+      renderCell: params => (
+        <Typography variant="body2">
+          {formatDateTime(
+            (params.row as TimesheetSyncJobInfo).lastUpdatedAtUtc ??
+              (params.row as TimesheetSyncJobInfo).LastUpdatedAtUtc
+          )}
+        </Typography>
+      )
     },
     {
       field: "errorMessage",
