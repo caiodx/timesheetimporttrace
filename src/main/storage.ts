@@ -11,7 +11,10 @@ let db: Database.Database | null = null;
 
 function getDb(): Database.Database {
   if (!db) {
-    const dbPath = path.join(app.getPath("userData"), "settings.db");
+    // Em produção, grava o banco ao lado do executável (.exe).
+    // Em desenvolvimento, continua usando a pasta padrão de dados do usuário.
+    const baseDir = app.isPackaged ? path.dirname(app.getPath("exe")) : app.getPath("userData");
+    const dbPath = path.join(baseDir, "settings.db");
     db = new Database(dbPath);
     db.prepare(
       "CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)"

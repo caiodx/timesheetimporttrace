@@ -8,10 +8,11 @@
     "dev:renderer": "vite",
     "dev:main": "npx tsc -p tsconfig.main.json && wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .",
     "build": "vite build && tsc -p tsconfig.main.json",
-    "build:win": "npm run build && electron-builder --win --x64",
-    "build:win:portable": "npm run build && electron-builder --win portable",
+    "build:win": "npm run rebuild && npm run build && electron-builder --win --x64",
+    "build:win:portable": "npm run rebuild && npm run build && electron-builder --win portable",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "rebuild": "electron-rebuild"
+    "rebuild": "electron-rebuild",
+    "postinstall": "electron-rebuild"
   },
   "keywords": [
     "electron",
@@ -65,6 +66,9 @@
     "files": [
       "dist/",
       "package.json"
+    ],
+    "asarUnpack": [
+      "**/better-sqlite3/**/*"
     ],
     "win": {
       "target": [
