@@ -36,7 +36,10 @@ function createWindow() {
   } else {
     mainWindow.loadURL(
       url.format({
-        pathname: path.join(__dirname, "../renderer/index.html"),
+        // Em build, o __dirname aqui é "dist/main/main"
+        // O index.html gerado pelo Vite fica em "dist/renderer/index.html"
+        // Por isso precisamos subir dois níveis: "../../renderer/index.html"
+        pathname: path.join(__dirname, "../../renderer/index.html"),
         protocol: "file:",
         slashes: true
       })
