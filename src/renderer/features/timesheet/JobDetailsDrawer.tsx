@@ -9,6 +9,7 @@ import {
   Chip
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import dayjs from "dayjs";
 import type { TimesheetSyncJobInfo } from "../../services/timesheetApi";
 
 interface Props {
@@ -55,6 +56,39 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
           }
         />
 
+        <Stack spacing={0.5} mb={2}>
+          <Typography variant="caption" color="text.secondary" display="block">
+            Data TS:{" "}
+            {(() => {
+              const value =
+                (job as TimesheetSyncJobInfo).timeSheetDate ??
+                (job as TimesheetSyncJobInfo).TimeSheetDate;
+              const d = value ? dayjs(value as any) : null;
+              return d && d.isValid() ? d.format("DD/MM/YYYY") : "—";
+            })()}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block">
+            Criado em:{" "}
+            {(() => {
+              const value =
+                (job as TimesheetSyncJobInfo).createdAtUtc ??
+                (job as TimesheetSyncJobInfo).CreatedAtUtc;
+              const d = value ? dayjs(value as any) : null;
+              return d && d.isValid() ? d.format("DD/MM/YYYY HH:mm") : "—";
+            })()}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block">
+            Atualizado em:{" "}
+            {(() => {
+              const value =
+                (job as TimesheetSyncJobInfo).lastUpdatedAtUtc ??
+                (job as TimesheetSyncJobInfo).LastUpdatedAtUtc;
+              const d = value ? dayjs(value as any) : null;
+              return d && d.isValid() ? d.format("DD/MM/YYYY HH:mm") : "—";
+            })()}
+          </Typography>
+        </Stack>
+
         <Typography variant="subtitle2" gutterBottom>
           Motorista
         </Typography>
@@ -68,6 +102,19 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
         </Typography>
         <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
           Código interno: {driver.internalNumber ?? "—"}
+        </Typography>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle2" gutterBottom>
+          Erro
+        </Typography>
+        <Typography
+          variant="body2"
+          color={job.errorMessage ?? (job as any).ErrorMessage ? "error" : "text.secondary"}
+          gutterBottom
+        >
+          {job.errorMessage ?? (job as any).ErrorMessage ?? "Sem erro informado."}
         </Typography>
 
         <Divider sx={{ my: 2 }} />
