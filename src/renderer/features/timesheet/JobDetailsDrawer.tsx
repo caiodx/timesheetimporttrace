@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Drawer,
   Box,
@@ -6,9 +6,12 @@ import {
   IconButton,
   Divider,
   Stack,
-  Chip
+  Chip,
+  Collapse
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import dayjs from "dayjs";
 import type { TimesheetSyncJobInfo } from "../../services/timesheetApi";
 
@@ -17,6 +20,120 @@ interface Props {
   open: boolean;
   onClose: () => void;
 }
+
+interface JsonTreeNodeProps {
+  name: string;
+  value: any;
+  level?: number;
+}
+
+const JsonTreeNode: React.FC<JsonTreeNodeProps> = ({ name, value, level = 0 }) => {
+  const [expanded, setExpanded] = useState(level < 2); // Expandir até 2 níveis por padrão
+
+  const isObject = value !== null && typeof value === "object" && !Array.isArray(value);
+  const isArray = Array.isArray(value);
+  const isExpandable = isObject || isArray;
+
+  const getValueDisplay = () => {
+    if (value === null)
+      return (
+        <Box component="span" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+          null
+        </Box>
+      );
+    if (value === undefined)
+      return (
+        <Box component="span" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+          undefined
+        </Box>
+      );
+    if (typeof value === "string")
+      return (
+        <Box component="span" sx={{ color: "#1976d2" }}>
+          "{value}"
+        </Box>
+      );
+    if (typeof value === "number")
+      return (
+        <Box component="span" sx={{ color: "#d32f2f" }}>
+          {value}
+        </Box>
+      );
+    if (typeof value === "boolean")
+      return (
+        <Box component="span" sx={{ color: "#388e3c" }}>
+          {String(value)}
+        </Box>
+      );
+    return null;
+  };
+
+  const renderChildren = () => {
+    if (isObject) {
+      return Object.entries(value).map(([key, val]) => (
+        <JsonTreeNode key={key} name={key} value={val} level={level + 1} />
+      ));
+    }
+    if (isArray) {
+      return value.map((item: any, index: number) => (
+        <JsonTreeNode key={index} name={String(index)} value={item} level={level + 1} />
+      ));
+    }
+    return null;
+  };
+
+  return (
+    <Box sx={{ ml: level * 1.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          cursor: isExpandable ? "pointer" : "default",
+          "&:hover": isExpandable ? { bgcolor: "action.hover" } : {},
+          py: 0.25,
+          px: 0.5,
+          borderRadius: 0.5,
+          fontFamily: "monospace",
+          fontSize: 12
+        }}
+        onClick={() => isExpandable && setExpanded(!expanded)}
+      >
+        {isExpandable ? (
+          expanded ? (
+            <ExpandMoreIcon sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+          ) : (
+            <ChevronRightIcon sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+          )
+        ) : (
+          <Box sx={{ width: 16, mr: 0.5 }} />
+        )}
+        <Box
+          component="span"
+          sx={{
+            fontWeight: isExpandable ? 600 : 400,
+            color: isExpandable ? "text.primary" : "text.secondary",
+            mr: 1,
+            minWidth: 110,
+            display: "inline-block"
+          }}
+        >
+          {name}:
+        </Box>
+        {!isExpandable && getValueDisplay()}
+        {isExpandable && (
+          <Box component="span" sx={{ color: "text.secondary" }}>
+            {isArray ? `[${value.length}]` : `{${Object.keys(value).length}}`}
+          </Box>
+        )}
+      </Box>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <Box sx={{ ml: 1 }}>
+          {renderChildren()}
+        </Box>
+      </Collapse>
+    </Box>
+  );
+};
 
 export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
   if (!job) return null;
@@ -139,6 +256,24 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
           }}
         >
           {JSON.stringify(job.payload, null, 2)}
+        </Box>
+
+        <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
+          Tree View
+        </Typography>
+        <Box
+          sx={{
+            mt: 1,
+            p: 1.5,
+            bgcolor: "grey.50",
+            borderRadius: 1,
+            maxHeight: 300,
+            overflow: "auto",
+            fontSize: 12,
+            fontFamily: "monospace"
+          }}
+        >
+          <JsonTreeNode name="payload" value={job.payload} />
         </Box>
       </Box>
     </Drawer>
