@@ -179,47 +179,69 @@ export const TimesheetJobsGrid: React.FC<Props> = ({
 
   if (loading && !rows.length) {
     return (
-      <Paper sx={{ p: 2.5 }}>
+      <Paper
+        sx={{
+          p: 2.5,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0
+        }}
+      >
         <Skeleton variant="text" width={180} height={28} />
-        <Skeleton variant="rectangular" height={280} sx={{ mt: 2, borderRadius: 2 }} />
+        <Skeleton
+          variant="rectangular"
+          sx={{ mt: 2, borderRadius: 2, flex: 1, minHeight: 0 }}
+        />
       </Paper>
     );
   }
 
   return (
-    <Paper sx={{ height: 420, p: 1.5 }}>
-      <DataGrid
-        rows={rows}
-        getRowId={(row: TimesheetSyncJobInfo) => row.jobId}
-        columns={columns}
-        page={page - 1}
-        onPageChange={newPage => onPageChange(newPage + 1)}
-        pageSizeOptions={[10, 25, 50]}
-        paginationMode="server"
-        rowCount={totalCount}
-        paginationModel={{ page: page - 1, pageSize }}
-        onPaginationModelChange={model => {
-          if (model.pageSize !== pageSize) {
-            onPageSizeChange(model.pageSize);
-          }
-          if (model.page + 1 !== page) {
-            onPageChange(model.page + 1);
-          }
-        }}
-        loading={loading || fetching}
-        disableRowSelectionOnClick
-        onRowClick={(params: GridRowParams) => onSelectJob(params.row as TimesheetSyncJobInfo)}
-        sx={{
-          border: "none",
-          "& .MuiDataGrid-columnHeaders": {
-            bgcolor: "grey.50"
-          },
-          "& .MuiDataGrid-row:hover": {
-            bgcolor: "action.hover",
-            cursor: "pointer"
-          }
-        }}
-      />
+    <Paper
+      sx={{
+        flex: 1,
+        p: 1.5,
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0
+      }}
+    >
+      <Box sx={{ flex: 1, minHeight: 0 }}>
+        <DataGrid
+          rows={rows}
+          getRowId={(row: TimesheetSyncJobInfo) => row.jobId}
+          columns={columns}
+          page={page - 1}
+          onPageChange={newPage => onPageChange(newPage + 1)}
+          pageSizeOptions={[10, 25, 50]}
+          paginationMode="server"
+          rowCount={totalCount}
+          paginationModel={{ page: page - 1, pageSize }}
+          onPaginationModelChange={model => {
+            if (model.pageSize !== pageSize) {
+              onPageSizeChange(model.pageSize);
+            }
+            if (model.page + 1 !== page) {
+              onPageChange(model.page + 1);
+            }
+          }}
+          loading={loading || fetching}
+          disableRowSelectionOnClick
+          onRowClick={(params: GridRowParams) => onSelectJob(params.row as TimesheetSyncJobInfo)}
+          sx={{
+            border: "none",
+            height: "100%",
+            "& .MuiDataGrid-columnHeaders": {
+              bgcolor: "grey.50"
+            },
+            "& .MuiDataGrid-row:hover": {
+              bgcolor: "action.hover",
+              cursor: "pointer"
+            }
+          }}
+        />
+      </Box>
       <Box mt={1} display="flex" justifyContent="space-between">
         <Typography variant="caption" color="text.secondary">
           {totalCount

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Stack, Snackbar, Alert, Slide } from "@mui/material";
+import { Stack, Snackbar, Alert, Slide, Box } from "@mui/material";
 import { useGetQueueJobsQuery } from "../../services/timesheetApi";
 import { TimesheetFilters, TimesheetFiltersValues } from "./TimesheetFilters";
 import { TimesheetJobsGrid } from "./TimesheetJobsGrid";
@@ -82,8 +82,8 @@ export const TimesheetPage: React.FC = () => {
   }, [isError]);
 
   return (
-    <>
-      <Stack spacing={2.5}>
+    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+      <Stack spacing={2.5} sx={{ flex: 1, minHeight: 0 }}>
         <TimesheetFilters
           values={filters}
           onChange={setFilters}
@@ -132,7 +132,7 @@ export const TimesheetPage: React.FC = () => {
           )}
         </Alert>
       </Snackbar>
-    </>
+    </Box>
   );
 };
 
