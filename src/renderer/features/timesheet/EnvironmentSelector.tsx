@@ -72,7 +72,6 @@ export const EnvironmentSelector: React.FC = () => {
   }, [current, customHost, hydrated]);
 
   return (
-    <Tooltip title="Selecione o ambiente de chamada da API">
       <Box sx={{ minWidth: 220 }}>
         <Stack direction="column" spacing={1}>
           <FormControl size="small" fullWidth variant="outlined">
@@ -103,6 +102,5 @@ export const EnvironmentSelector: React.FC = () => {
           )}
         </Stack>
       </Box>
-    </Tooltip>
   );
 };
