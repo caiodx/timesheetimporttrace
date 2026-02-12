@@ -28,7 +28,7 @@ interface JsonTreeNodeProps {
 }
 
 const JsonTreeNode: React.FC<JsonTreeNodeProps> = ({ name, value, level = 0 }) => {
-  const [expanded, setExpanded] = useState(level < 2); // Expandir até 2 níveis por padrão
+  const [expanded, setExpanded] = useState(false); // Todos os nós começam colapsados
 
   const isObject = value !== null && typeof value === "object" && !Array.isArray(value);
   const isArray = Array.isArray(value);
