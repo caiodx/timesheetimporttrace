@@ -3,6 +3,8 @@ import type { RootState } from "../store";
 
 export type EnvironmentKey = "develop" | "qa" | "prod" | "local";
 
+export type TimesheetSyncJobDataType = "TimesheetDate" | "CreateDate";
+
 export interface DriverSyncData {
   email: string;
   personalEmail: string;
@@ -101,6 +103,7 @@ export interface QueueJobsQuery {
   email?: string;
   timeSheetDateIni?: string;
   timeSheetDateEnd?: string;
+  dataType?: TimesheetSyncJobDataType;
   _ts?: number; // Timestamp para forçar refetch
   _env?: string; // Ambiente para forçar refetch quando mudar
 }
@@ -156,8 +159,16 @@ export const timesheetApi = createApi({
   endpoints: builder => ({
     getQueueJobs: builder.query<TimesheetSyncJobPage, QueueJobsQuery>({
       query: params => {
-        const { page, pageSize, status, driverName, email, timeSheetDateIni, timeSheetDateEnd } =
-          params;
+        const {
+          page,
+          pageSize,
+          status,
+          driverName,
+          email,
+          timeSheetDateIni,
+          timeSheetDateEnd,
+          dataType
+        } = params;
 
         const queryParams: Record<string, string | number> = {
           page,
@@ -169,6 +180,7 @@ export const timesheetApi = createApi({
         if (email) queryParams.email = email;
         if (timeSheetDateIni) queryParams.timeSheetDateIni = timeSheetDateIni;
         if (timeSheetDateEnd) queryParams.timeSheetDateEnd = timeSheetDateEnd;
+        if (dataType) queryParams.dataType = dataType;
 
         return {
           url: "/api/v1/Sync/queue-jobs",

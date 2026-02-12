@@ -4,7 +4,11 @@ import { useGetQueueJobsQuery } from "../../services/timesheetApi";
 import { TimesheetFilters, TimesheetFiltersValues } from "./TimesheetFilters";
 import { TimesheetJobsGrid } from "./TimesheetJobsGrid";
 import { JobDetailsDrawer } from "./JobDetailsDrawer";
-import type { TimesheetSyncJobInfo, TimesheetSyncJobStatus } from "../../services/timesheetApi";
+import type {
+  TimesheetSyncJobInfo,
+  TimesheetSyncJobStatus,
+  TimesheetSyncJobDataType
+} from "../../services/timesheetApi";
 import { useAppSelector } from "../../hooks";
 
 const SlideUp = (props: any) => <Slide {...props} direction="up" />;
@@ -24,7 +28,8 @@ export const TimesheetPage: React.FC = () => {
     driverName: "",
     email: "",
     timeSheetDateIni: today,
-    timeSheetDateEnd: endOfMonth
+    timeSheetDateEnd: endOfMonth,
+    dataType: "TimesheetDate" as TimesheetSyncJobDataType
   });
 
   const [page, setPage] = useState(1);
@@ -44,6 +49,7 @@ export const TimesheetPage: React.FC = () => {
       timeSheetDateEnd: filters.timeSheetDateEnd
         ? `${filters.timeSheetDateEnd}T23:59:59`
         : undefined,
+      dataType: filters.dataType,
       page,
       pageSize,
       _ts: searchTrigger,
@@ -67,7 +73,8 @@ export const TimesheetPage: React.FC = () => {
       driverName: "",
       email: "",
       timeSheetDateIni: today,
-      timeSheetDateEnd: endOfMonth
+      timeSheetDateEnd: endOfMonth,
+      dataType: "TimesheetDate" as TimesheetSyncJobDataType
     });
     setPage(1);
     setSearchTrigger(x => x + 1);

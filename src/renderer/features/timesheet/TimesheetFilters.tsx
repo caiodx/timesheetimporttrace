@@ -12,7 +12,10 @@ import {
   Typography,
   CircularProgress
 } from "@mui/material";
-import type { TimesheetSyncJobStatus } from "../../services/timesheetApi";
+import type {
+  TimesheetSyncJobStatus,
+  TimesheetSyncJobDataType
+} from "../../services/timesheetApi";
 
 export interface TimesheetFiltersValues {
   status?: TimesheetSyncJobStatus;
@@ -20,6 +23,7 @@ export interface TimesheetFiltersValues {
   email: string;
   timeSheetDateIni: string;
   timeSheetDateEnd: string;
+  dataType: TimesheetSyncJobDataType;
 }
 
 interface Props {
@@ -35,6 +39,11 @@ const statusOptions: { value: TimesheetSyncJobStatus; label: string }[] = [
   { value: "Processing", label: "Processing" },
   { value: "Completed", label: "Completed" },
   { value: "Failed", label: "Failed" }
+];
+
+const dataTypeOptions: { value: TimesheetSyncJobDataType; label: string }[] = [
+  { value: "TimesheetDate", label: "Data da timesheet" },
+  { value: "CreateDate", label: "Data de criação" }
 ];
 
 export const TimesheetFilters: React.FC<Props> = ({
@@ -54,6 +63,10 @@ export const TimesheetFilters: React.FC<Props> = ({
     onChange({ ...values, status: event.target.value as TimesheetSyncJobStatus });
   };
 
+  const handleDataTypeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    onChange({ ...values, dataType: event.target.value as TimesheetSyncJobDataType });
+  };
+
   const hasFilters = !!values.status || !!values.driverName || !!values.email;
 
   return (
@@ -64,7 +77,7 @@ export const TimesheetFilters: React.FC<Props> = ({
             Filtros da fila de timesheets
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Refine a busca por status, motorista, e-mail e data da timesheet.
+            Refine a busca por status, motorista, e-mail e tipo de data utilizada no filtro.
           </Typography>
         </Stack>
         {loading && <CircularProgress size={20} />}
@@ -140,6 +153,27 @@ export const TimesheetFilters: React.FC<Props> = ({
             onChange={handleFieldChange("timeSheetDateEnd")}
             InputLabelProps={{ shrink: true }}
           />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <FormControl fullWidth size="small">
+            <InputLabel id="data-type-label" shrink>
+              Filtrar por data
+            </InputLabel>
+            <Select
+              labelId="data-type-label"
+              id="data-type-select"
+              value={values.dataType}
+              label="Filtrar por data"
+              onChange={handleDataTypeChange as any}
+            >
+              {dataTypeOptions.map(option => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid>
       </Grid>
 
