@@ -1,13 +1,7 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge } from "electron";
 
-contextBridge.exposeInMainWorld("electronAPI", {
-  getEnvironment: () =>
-    ipcRenderer.invoke("settings:getEnvironment") as Promise<
-      { current: string; customHost: string } | null
-    >,
-  setEnvironment: (settings: { current: string; customHost: string }) =>
-    ipcRenderer.invoke("settings:setEnvironment", settings)
-});
+// ElectronAPI removido - não há mais persistência de preferências
+contextBridge.exposeInMainWorld("electronAPI", {});
 
 export {};
 

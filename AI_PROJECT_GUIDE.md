@@ -16,9 +16,7 @@
 - **Estado**:
   - Redux Toolkit (`configureStore`) em `src/renderer/store.ts`.
   - RTK Query (`createApi`) para chamadas HTTP ao backend de timesheets.
-  - Persistência leve de preferências em **SQLite** (via `better-sqlite3`) no processo main, com o arquivo `settings.db` gravado:
-    - Em dev: em `app.getPath("userData")`.
-    - Em build (app empacotado): na **mesma pasta do `.exe`**.
+  - Preferências de ambiente armazenadas apenas em memória (Redux state), não persistidas em disco.
 
 ## Estrutura relevante de pastas (renderer)
 
@@ -106,31 +104,7 @@
   - Quando `Local` está selecionado:
     - Exibe um `TextField` logo abaixo para digitar o host (ex.: `http://localhost:5000`).
     - O valor do campo é salvo em `customHost` via `setLocalHost`.
-  - Integração com Electron:
-    - Usa `window.electronAPI.getEnvironment()` e `.setEnvironment()` (expostos pelo preload) para persistir `current` e `customHost` em SQLite.
-    - Na montagem, lê valores salvos e hidrata o slice; depois disso, qualquer mudança é gravada automaticamente.
-
-## Persistência (SQLite + preload + IPC)
-
-- Arquivo: `src/main/storage.ts`
-  - Usa `better-sqlite3` para gravar um pequeno banco `settings.db`.
-    - Em dev: caminho base = `app.getPath("userData")`.
-    - Em build (`app.isPackaged === true`): caminho base = `path.dirname(app.getPath("exe"))`, ou seja, **ao lado do `.exe`**.
-  - Tabela `app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`.
-  - Funções:
-    - `getEnvironmentSettings(): { current: string; customHost: string } | null`.
-    - `saveEnvironmentSettings(settings)`.
-- `src/main/main.ts`:
-  - Registra IPC:
-    - `settings:getEnvironment` → devolve `getEnvironmentSettings()`.
-    - `settings:setEnvironment` → chama `saveEnvironmentSettings`.
-  - Aponta `preload` para `dist/main/preload/preload.js`.
-- `src/preload/preload.ts`:
-  - Usa `contextBridge` para expor em `window`:
-    - `electronAPI.getEnvironment()`.
-    - `electronAPI.setEnvironment(settings)`.
-- `src/types/electron-api.d.ts`:
-  - Declara os tipos de `window.electronAPI` para o TypeScript do renderer.
+  - **Nota**: As preferências de ambiente não são persistidas. A seleção é mantida apenas em memória (Redux state) enquanto o app estiver aberto. Ao fechar e reabrir, o ambiente volta ao padrão (Develop).
 
 ## Layout principal da tela
 
