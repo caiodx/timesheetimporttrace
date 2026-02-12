@@ -70,7 +70,9 @@
     "asarUnpack": [
       "**/better-sqlite3/**/*"
     ],
+    "icon": "Logo.ico",
     "win": {
+      "icon": "Logo.ico",
       "target": [
         "nsis",
         "portable"
