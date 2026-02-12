@@ -107,8 +107,8 @@ export interface QueueJobsQuery {
 
 const hostsByEnv: Record<Exclude<EnvironmentKey, "local">, string> = {
   develop: "https://api-transporter.dev.transporter.brqapps.com",
-  qa: "https://api-transporter.qa.transporter.brqapps.com",
-  prod: "https://api-transporter.prod.transporter.brqapps.com"
+  qa: "https://api-transporter.qld.transporter.brqapps.com",
+  prod: "https://api-transporter.transporter.brqapps.com"
 };
 
 const rawBaseQuery = fetchBaseQuery({
