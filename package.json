@@ -65,22 +65,22 @@
       "dist/",
       "package.json"
     ],
-    "icon": "Logo.ico",
     "win": {
-      "icon": "Logo.ico",
       "target": [
         "nsis",
         "portable"
-      ]
+      ],
+      "requestedExecutionLevel": "asInvoker"
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": true,
-      "allowElevation": true,
+      "perMachine": false,
+      "allowElevation": false,
       "allowToChangeInstallationDirectory": true,
       "runAfterFinish": false,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false
     }
   }
 }
