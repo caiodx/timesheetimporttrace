@@ -8,11 +8,12 @@
     "dev:renderer": "vite",
     "dev:main": "npx tsc -p tsconfig.main.json && wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .",
     "build": "vite build && tsc -p tsconfig.main.json",
+    "build:web": "cross-env VITE_BUILD_TARGET=web vite build --config vite.config.ts",
     "build:win": "npm run rebuild && npm run build && electron-builder --win --x64",
     "build:win:portable": "npm run rebuild && npm run build && electron-builder --win portable",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "rebuild": "electron-rebuild",
-    "postinstall": "electron-rebuild"
+    "postinstall": "node -e \"if (!process.env.VERCEL && !process.env.CI) { try { require('electron-rebuild'); } catch(e) { console.log('electron-rebuild skipped'); } }\""
   },
   "keywords": [
     "electron",

@@ -139,11 +139,36 @@ npm run rebuild
 
 ---
 
-### 9. Short English summary
+### 9. Deploy na Vercel (Web)
+
+O projeto pode ser deployado na Vercel para acesso via web:
+
+1. **Conectar o repositório na Vercel**:
+   - Acesse [vercel.com](https://vercel.com)
+   - Importe o repositório GitHub
+   - A Vercel detectará automaticamente a configuração do `vercel.json`
+
+2. **Build automático**:
+   - O script `build:web` será executado automaticamente
+   - O build gera os arquivos em `dist/web/`
+   - A configuração usa SPA routing (todas as rotas redirecionam para `index.html`)
+
+3. **Build local para testar**:
+   ```bash
+   npm run build:web
+   ```
+   Os arquivos serão gerados em `dist/web/` e podem ser servidos localmente.
+
+**Nota**: O build web não inclui código específico do Electron (processo main e preload), apenas o renderer React que funciona tanto no Electron quanto na web.
+
+---
+
+### 10. Short English summary
 
 - **Stack**: Electron + React + TypeScript + Redux Toolkit + Material UI + RTK Query.
 - **Purpose**: Desktop app to monitor paginated timesheet sync jobs and inspect payloads.
 - **Dev**: `npm run dev`.
 - **Windows build**: `npm run build:win` (installer) or `npm run build:win:portable` (portable).
+- **Web build**: `npm run build:web` (for Vercel deployment).
 - **Preferences**: Environment selection is stored only in memory (Redux state) and resets to default when the app is closed.
 

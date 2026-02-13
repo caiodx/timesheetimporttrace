@@ -1,0 +1,8 @@
+# Arquivos do Electron que não são necessários para o build web
+src/main/
+src/preload/
+dist/main/
+dist/renderer/
+release/
+node_modules/.cache/
+*.log
