@@ -224,6 +224,19 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
         <Divider sx={{ my: 2 }} />
 
         <Typography variant="subtitle2" gutterBottom>
+          Mensagem
+        </Typography>
+        <Typography
+          variant="body2"
+          color={job.message ?? (job as any).Message ? "text.primary" : "text.secondary"}
+          gutterBottom
+        >
+          {job.message ?? (job as any).Message ?? "Sem mensagem informada."}
+        </Typography>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle2" gutterBottom>
           Erro
         </Typography>
         <Typography

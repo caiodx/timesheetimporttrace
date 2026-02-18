@@ -75,6 +75,7 @@ export interface TimesheetSyncJobInfo {
   timeSheetDate: string;
   createdAtUtc: string;
   lastUpdatedAtUtc: string;
+  message?: string | null;
   errorMessage?: string | null;
   payload: SyncData;
   // fallback quando a API retornar em PascalCase (C# default)
@@ -84,6 +85,7 @@ export interface TimesheetSyncJobInfo {
   TimeSheetDate?: string;
   CreatedAtUtc?: string;
   LastUpdatedAtUtc?: string;
+   Message?: string | null;
   ErrorMessage?: string | null;
   Payload?: SyncData;
 }
