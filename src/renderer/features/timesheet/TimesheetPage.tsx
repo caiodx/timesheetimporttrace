@@ -13,6 +13,20 @@ import { useAppSelector } from "../../hooks";
 
 const SlideUp = (props: any) => <Slide {...props} direction="up" />;
 
+function getDefaultFilters(
+  today: string,
+  endOfMonth: string
+): TimesheetFiltersValues {
+  return {
+    status: undefined,
+    driverName: "",
+    email: "",
+    timeSheetDateIni: today,
+    timeSheetDateEnd: endOfMonth,
+    dataType: "TimesheetDate" as TimesheetSyncJobDataType
+  };
+}
+
 export const TimesheetPage: React.FC = () => {
   const todayDate = new Date();
   const today = todayDate.toISOString().slice(0, 10); // yyyy-MM-dd
@@ -23,14 +37,9 @@ export const TimesheetPage: React.FC = () => {
   const currentEnvironment = useAppSelector(state => state.environment.current);
   const customHost = useAppSelector(state => state.environment.customHost);
 
-  const [filters, setFilters] = useState<TimesheetFiltersValues>({
-    status: undefined,
-    driverName: "",
-    email: "",
-    timeSheetDateIni: today,
-    timeSheetDateEnd: endOfMonth,
-    dataType: "TimesheetDate" as TimesheetSyncJobDataType
-  });
+  const [filters, setFilters] = useState<TimesheetFiltersValues>(() =>
+    getDefaultFilters(today, endOfMonth)
+  );
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -68,14 +77,7 @@ export const TimesheetPage: React.FC = () => {
   };
 
   const handleClear = () => {
-    setFilters({
-      status: undefined,
-      driverName: "",
-      email: "",
-      timeSheetDateIni: today,
-      timeSheetDateEnd: endOfMonth,
-      dataType: "TimesheetDate" as TimesheetSyncJobDataType
-    });
+    setFilters(getDefaultFilters(today, endOfMonth));
     setPage(1);
     setSearchTrigger(x => x + 1);
   };
