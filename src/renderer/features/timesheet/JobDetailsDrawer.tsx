@@ -143,6 +143,8 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
 
   const driver = job.payload.driver;
   const timesheets = job.payload.timesheets ?? [];
+  const message = job.message ?? (job as any).Message;
+  const messageLines = formatMultilineText(message ?? "Sem mensagem informada.").split("\n");
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
@@ -229,16 +231,33 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
         <Typography variant="subtitle2" gutterBottom>
           Mensagem
         </Typography>
-        <Typography
-          variant="body2"
-          color={job.message ?? (job as any).Message ? "text.primary" : "text.secondary"}
-          gutterBottom
-          sx={{ whiteSpace: "pre-line" }}
+        <Box
+          sx={{
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1,
+            overflow: "hidden",
+            mb: 1
+          }}
         >
-          {formatMultilineText(
-            job.message ?? (job as any).Message ?? "Sem mensagem informada."
-          )}
-        </Typography>
+          {messageLines.map((line, index) => (
+            <Typography
+              key={index}
+              component="div"
+              variant="body2"
+              color={message ? "text.primary" : "text.secondary"}
+              sx={{
+                bgcolor: index % 2 === 0 ? "background.paper" : "action.hover",
+                px: 1,
+                py: 0.75,
+                whiteSpace: "pre-wrap",
+                overflowWrap: "anywhere"
+              }}
+            >
+              {line || "\u00a0"}
+            </Typography>
+          ))}
+        </Box>
 
         <Divider sx={{ my: 2 }} />
 
