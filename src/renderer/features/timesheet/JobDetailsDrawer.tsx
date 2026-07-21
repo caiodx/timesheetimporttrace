@@ -27,6 +27,9 @@ interface JsonTreeNodeProps {
   level?: number;
 }
 
+const formatMultilineText = (value: string) =>
+  value.replace(/\\r\\n|\\n|\\r/g, "\n");
+
 const JsonTreeNode: React.FC<JsonTreeNodeProps> = ({ name, value, level = 0 }) => {
   const [expanded, setExpanded] = useState(false); // Todos os nós começam colapsados
 
@@ -230,8 +233,11 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
           variant="body2"
           color={job.message ?? (job as any).Message ? "text.primary" : "text.secondary"}
           gutterBottom
+          sx={{ whiteSpace: "pre-line" }}
         >
-          {job.message ?? (job as any).Message ?? "Sem mensagem informada."}
+          {formatMultilineText(
+            job.message ?? (job as any).Message ?? "Sem mensagem informada."
+          )}
         </Typography>
 
         <Divider sx={{ my: 2 }} />
@@ -292,4 +298,3 @@ export const JobDetailsDrawer: React.FC<Props> = ({ job, open, onClose }) => {
     </Drawer>
   );
 };
-
