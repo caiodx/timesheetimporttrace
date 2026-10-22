@@ -7,7 +7,7 @@ export interface EnvironmentState {
 }
 
 const initialState: EnvironmentState = {
-  current: "develop",
+  current: "prod",
   customHost: ""
 };
 
